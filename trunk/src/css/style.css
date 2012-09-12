@@ -215,22 +215,67 @@ td { vertical-align: top; }
 
 
 /* ==|== primary styles =====================================================
-   Author:
+   Author: Gabriel Heiler
    ========================================================================== */
 
+.te-toolbox .btn-container {
+    width: 12%;
+    float: left;
+    height: 99%;
+    padding: 1%;
+    box-sizing: border-box;
+}
+.te-toolbox .circle {
+    border: 1px solid black;
+    border-radius: 2em;
+    height: 40px;
+    width: 40px;
+    margin: 0 auto;
+    margin-top: 7px;
+}
 
+.te-toolbox .rect {
+    border: 1px solid black;
+    height: 40px;
+    width: 40px;
+    margin: 0 auto;
+    margin-top: 7px;
+}
+.te-toolbox .line {
+    margin: 5px auto;
+    width: 45px;
+    height: 5px;
+    background-color: black;
+    margin-top: 26px;
+}
+.te-toolbox .text {
+    margin: 0 auto;
+    margin-top: 16px;
+    text-align: center;
+}
 
+.te-toolbox .img {
+    margin: 0 auto;
+    margin-top: 5px;
+    background-image: url(../img/ui/upload.png);
+    height: 45px;
+    width: 45px;
+}
+.te-toolbox .stroke {
+    background-image: url(../img/shapes/stroke.png);
+    margin: 0 auto;
+    margin-top: 7px;
+    height: 45px;
+    width: 45px;
+}
 
+.te-toolbox {
+    border-bottom: 2px solid black;
+}
 
-
-
-
-
-
-
-
-
-
+.te-toolbox .btn-container div {
+    cursor: pointer;
+}
 
 
 /* ==|== media queries ======================================================
@@ -290,63 +335,4 @@ td { vertical-align: top; }
   @page { margin: 0.5cm; }
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3 { page-break-after: avoid; }
-}
-
-.te-toolbox .btn-container {
-    width: 12%;
-    float: left;
-    height: 99%;
-    padding: 1%;
-    box-sizing: border-box;
-}
-.te-toolbox .circle {
-    border: 1px solid black;
-    border-radius: 2em;
-    height: 40px;
-    width: 40px;
-    margin: 0 auto;
-    margin-top: 7px;
-}
-
-.te-toolbox .rect {
-    border: 1px solid black;
-    height: 40px;
-    width: 40px;
-    margin: 0 auto;
-    margin-top: 7px;
-}
-.te-toolbox .line {
-    margin: 5px auto;
-    width: 45px;
-    height: 5px;
-    background-color: black;
-    margin-top: 26px;
-}
-.te-toolbox .text {
-    margin: 0 auto;
-    margin-top: 16px;
-    text-align: center;
-}
-
-.te-toolbox .img {
-    margin: 0 auto;
-    margin-top: 5px;
-    background-image: url(../img/ui/upload.png);
-    height: 45px;
-    width: 45px;
-}
-.te-toolbox .stroke {
-    background-image: url(../img/shapes/stroke.png);
-    margin: 0 auto;
-    margin-top: 7px;
-    height: 45px;
-    width: 45px;
-}
-
-.te-toolbox {
-    border-bottom: 2px solid black;
-}
-
-.te-toolbox .btn-container div {
-    cursor: pointer;
 }

@@ -1,22 +1,21 @@
-/* Author: Gabriel Heiler
-
-*/
+/* Author: Gabriel Heiler */
 /*global document: false, window: false, console: false */
 
-var touchEditor = {
-    CanvasSettings: { canvasHeight: 80, canvasWidth: 100, toolBoxHeight: 20, toolBoxWidth: 100, toolBoxRealWidth: null, containerSelector: null, selectedShape: null },
-    InitWithContainer: function(selector) {
+var ctEditor = {
+    canvasSettings: { canvasHeight: 80, canvasWidth: 100, toolBoxHeight: 20, toolBoxWidth: 100, toolBoxRealWidth: null, containerSelector: null, selectedShape: null },
+    shapeType: { cirlce: "circle", rect: "rect", line: "line", stroke: "stroke", img: "img" },
+    InitWithContainer: function (selector) {
         "use strict";
-        this.CanvasSettings.containerSelector = selector;
-        this.CreateToolBox();
-        this.CreatePaintCanvas();
+        this.canvasSettings.containerSelector = selector;
+        this.createToolBox();
+        this.createCanvas();
     },
-    CreatePaintCanvas: function() {
+    createCanvas: function () {
         "use strict";
         // declare scope Vars
-        var realHeight, realWidth, canvas, container;
-        container = document.getElementById(this.CanvasSettings.containerSelector);
-        if(container) {
+        var realHeight, realWidth, canvas, container, s;
+        container = document.getElementById(this.canvasSettings.containerSelector);
+        if (container) {
             // set height and width of the container I received to maximun
             container.style.width = "100%";
             container.style.height = "100%";
@@ -25,36 +24,36 @@ var touchEditor = {
             realWidth = parseInt(window.getComputedStyle(container, null).getPropertyValue("width").split("px").join(""), 10);
             // create the canvas with the values
             canvas = document.createElement("canvas");
-            canvas.setAttribute("width", (realWidth * this.CanvasSettings.canvasWidth) / 100 + "px");
-            canvas.setAttribute("height", (realHeight * this.CanvasSettings.canvasHeight) / 100 + "px");
+            canvas.setAttribute("width", (realWidth * this.canvasSettings.canvasWidth) / 100 + "px");
+            canvas.setAttribute("height", (realHeight * this.canvasSettings.canvasHeight) / 100 + "px");
             canvas.style.backgroundImage = "url(../img/bg/noise.png)";
 
             canvas.setAttribute("id", "te_canvas");
             container.appendChild(canvas);
-            var s = new CanvasState(document.getElementById('te_canvas'));
+            s = new CanvasState(document.getElementById('te_canvas')); // Create the state object of the canvas
 
         } else {
             console.log("Could not find the canvas container");
         }
     },
-    CreateToolBox: function() {
+    createToolBox: function () {
         "use strict";
         // declare scope Vars
         var realHeight, realWidth, toolBox, container, buttonPadTop = 10, buttonPadLeft = 10, buttonSizeHeight = 20, buttonSizeWidth;
-        container = document.getElementById(this.CanvasSettings.containerSelector);
-        if(container) {
+        container = document.getElementById(this.canvasSettings.containerSelector);
+        if (container) {
             // set height and width of the container I received to maximun
             container.style.width = "100%";
             container.style.height = "100%";
             // then get the real height and width of the container
             realHeight = parseInt(window.getComputedStyle(container, null).getPropertyValue("height"), 10);
             realWidth = parseInt(window.getComputedStyle(container, null).getPropertyValue("width"), 10);
-            var calcHeight = (realHeight * this.CanvasSettings.toolBoxHeight) / 100;
-            if(calcHeight > 95) { calcHeight = 95; }
+            var calcHeight = (realHeight * this.canvasSettings.toolBoxHeight) / 100;
+            if (calcHeight > 95) { calcHeight = 95; }
             this.toolBoxRealWidth = calcHeight;
             // create the canvas with the values
             toolBox = document.createElement("div");
-            toolBox.setAttribute("width", (realWidth * this.CanvasSettings.toolBoxWidth) / 100 + "px");
+            toolBox.setAttribute("width", (realWidth * this.canvasSettings.toolBoxWidth) / 100 + "px");
             toolBox.setAttribute("height", calcHeight + "px");
             toolBox.style.height = calcHeight + "px";
             toolBox.setAttribute("id", "te_toolbox");
@@ -64,13 +63,13 @@ var touchEditor = {
             // create a div button container
 
             //draw a circle
-            this.DrawToolBoxShape("circle", toolBox);
-            this.DrawToolBoxShape("rect", toolBox);
-            this.DrawToolBoxShape("line", toolBox);
-            this.DrawToolBoxShape("text", toolBox);
-            this.DrawToolBoxShape("stroke", toolBox);
-            this.DrawToolBoxShape("img", toolBox);
-            //this.DrawToolBoxShape("cuca", toolBox);
+            this.drawToolBoxShape("circle", toolBox);
+            this.drawToolBoxShape("rect", toolBox);
+            this.drawToolBoxShape("line", toolBox);
+            this.drawToolBoxShape("text", toolBox);
+            this.drawToolBoxShape("stroke", toolBox);
+            this.drawToolBoxShape("img", toolBox);
+            //this.drawToolBoxShape("cuca", toolBox);
 
             // draw more stuff
             // TODO: draw stroke and fill color picker, stroke wide, undo, redo, rubber, clear all, save
@@ -79,37 +78,40 @@ var touchEditor = {
             console.log("Could not find the canvas container");
         }
     },
-    DrawToolBoxShape: function(type, toolBox) {
+    drawToolBoxShape: function (type, toolBox) {
+        "use strict";
         // create a div button container
         var btnCont = document.createElement("div");
         btnCont.setAttribute("class", "btn-container");
-        btnCont.setAttribute("onclick", "touchEditor.SetShape(this, '" + type + "');");
+        btnCont.setAttribute("onclick", "ctEditor.setShape(this, '" + type + "');");
         //draw a shape
         var shape = document.createElement("div");
         shape.setAttribute("class", type);
-        if(type == "text") {
+        if (type == "text") {
             shape.innerHTML = "texto";
         }
         btnCont.appendChild(shape);
         toolBox.appendChild(btnCont);
     },
-    SetShape: function(el, type) {
-        this.CanvasSettings.selectedShape = type;
-        var divShape = document.getElementById(this.CanvasSettings.containerSelector);
-        this.DeSelectAllShapes();
+    setShape: function (el, type) {
+        "use strict";
+        this.canvasSettings.selectedShape = type;
+        var divShape = document.getElementById(this.canvasSettings.containerSelector);
+        this.deSelectAllShapes();
         el.style.border = "1px #CCC   solid";
-        if(type === "stroke") {
+        if (type === this.shapeType.stroke) {
             myState.stroke = true;
             myState.addShape(new Shape("stroke", null, null, 0, 0, null, null));
         } else {
             myState.stroke = false;
         }
     },
-    DeSelectAllShapes: function() {
-        var shapesContainers = document.getElementsByClassName("btn-container");
-        var i;
-        var total = shapesContainers.length;
-        for(i = 0; i < total; i++) {
+    deSelectAllShapes: function () {
+        "use strict";
+        var shapesContainers, i, total;
+        shapesContainers = document.getElementsByClassName("btn-container"); // TODO: use the canvas container as a first filter
+        total = shapesContainers.length;
+        for (i = 0; i < total; i++) {
             shapesContainers[i].style.border = "none";
         }
     }
@@ -136,7 +138,7 @@ function Shape(type, x, y, w, h, stroke, fill, radius, text, url) {
   // This is a very simple and unsafe constructor. All we're doing is checking if the values exist.
   // "x || 0" just means "if there is a value for x, use that. Otherwise use 0."
   // But we aren't checking anything else! We could put "Lalala" for the value of x 
-  this.type = type || "line";
+  this.type = type || ctEditor.shapeType.line;
   this.x = x || null;
   this.y = y || null;
   this.w = w || 1;
@@ -154,22 +156,19 @@ Shape.prototype.draw = function(ctx) {
     ctx.strokeStyle = this.strokeStyle;
 
     switch(this.type) {
-        case "rect":
+        case ctEditor.shapeType.rect:
             ctx.rect(this.x, this.y, this.w, this.h);
             break;
-        case "circle":
+        case ctEditor.shapeType.cirlce:
             ctx.arc(this.x + this.r, this.y + this.r, this.r, 0, Math.PI * 2, true);
             break;
-        case "line":
-            /*tx.moveTo(this.x, this.y);
-            ctx.lineTo(this.w, this.h);*/
+        case ctEditor.shapeType.line:
             ctx.rect(this.x, this.y, this.w, this.h); // if not this way height is always 1px
             break;
-        case "stroke":
+        case ctEditor.shapeType.stroke:
             if(myState.lastStrokeCoords.x !== null && this.x !== null) {
                 ctx.moveTo(myState.lastStrokeCoords.x, myState.lastStrokeCoords.y);
                 ctx.lineTo(this.x, this.y);
-                //console.log("me movi aca: " + myState.lastStrokeCoords.x + "," +  myState.lastStrokeCoords.y + " y dibuje una linea desde ahi hasta aca: " + this.x + "," + this.y);
             } else {
                 myState.lastStrokeCoords.x = this.x;
                 myState.lastStrokeCoords.y = this.y;
@@ -178,14 +177,14 @@ Shape.prototype.draw = function(ctx) {
             myState.lastStrokeCoords.x = this.x;
             myState.lastStrokeCoords.y = this.y;
             break;
-        case "text":
+        case ctEditor.shapeType.text:
             // TODO: Implement
             context.font = 'italic 30px sans-serif';
             context.textBaseline = 'top';
             context.fillText(this.text, 0, 0);
             return;
             break;
-        case "image":
+        case ctEditor.shapeType.img:
             var img = new Image();
             img.onload = function() {
                 ctx.drawImage(img, buttonPadLeft * 9, buttonPadTop);
@@ -216,7 +215,6 @@ Shape.prototype.contains = function(mx, my) {
 
 function CanvasState(canvas) {
     // **** First some setup! ****
-
     this.canvas = canvas;
     this.width = canvas.width;
     this.height = canvas.height;
@@ -302,7 +300,7 @@ function CanvasState(canvas) {
     
     function mouseXY(e) {
         // TODO: Compare with CanvasState.prototype.getMouse and look one is better
-        var can = document.getElementById(touchEditor.CanvasSettings.containerSelector);
+        var can = document.getElementById(ctEditor.canvasSettings.containerSelector);
         if(!e) e = event;
         return {
             x: e.pageX - can.offsetLeft,
@@ -311,7 +309,7 @@ function CanvasState(canvas) {
     }
     function touchXY(e) {
         // TODO: Compare with CanvasState.prototype.getMouse and look one is better
-        var can = document.getElementById(touchEditor.CanvasSettings.containerSelector);
+        var can = document.getElementById(ctEditor.canvasSettings.containerSelector);
         if(!e) e = event;
         e.preventDefault();
         return { 
@@ -370,9 +368,11 @@ function CanvasState(canvas) {
 
 
     // double click for making new shapes
-    canvas.addEventListener('dblclick', function(e) {
+    canvas.addEventListener('dblclick', function (e) {
         var mouse = myState.getPosition(e);
-        myState.addShape(new Shape("rect", mouse.x - 10, mouse.y - 10, 20, 20, null,"rgba(0,255,0,.6)"));
+        if (ctEditor.canvasSettings.selectedShape !== null) {
+            myState.createDefaultShapeFromType(ctEditor.canvasSettings.selectedShape, mouse.x, mouse.y);
+        }
     }, true);
 
     // **** Options! ****
@@ -453,24 +453,29 @@ CanvasState.prototype.getPosition = function(e) {
     return { x: mx, y: my };
 }
 
-CanvasState.prototype.checkTouchClick = function() {
+CanvasState.prototype.checkTouchClick = function () {
     // TODO: move to add default/userdefined shape function
-    if(this.endTime - this.startTime < 200 && (this.startCords.x === this.endCords.x && this.startCords.y === this.endCords.y) && touchEditor.CanvasSettings.selectedShape !== null) {
-        if(touchEditor.CanvasSettings.selectedShape === "circle") {
-            this.addShape(new Shape(touchEditor.CanvasSettings.selectedShape, this.startCords.x - 30, this.startCords.y - 30, 60, 60, null, "black)", 30));
-        } else if(touchEditor.CanvasSettings.selectedShape === "rect") {
-            this.addShape(new Shape(touchEditor.CanvasSettings.selectedShape, this.startCords.x - 15, this.startCords.y - 15, 30, 30, null, "rgba(0,255,0,.6)"));
-        } else if(touchEditor.CanvasSettings.selectedShape === "line") {
-            this.addShape(new Shape(touchEditor.CanvasSettings.selectedShape, this.startCords.x - 25, this.startCords.y - 2, 60, 5, null, "#CCCCCC"));
-        } else if(touchEditor.CanvasSettings.selectedShape === "text") {
-            // TODO: Do Stuff related to text
-        } else if(touchEditor.CanvasSettings.selectedShape === "stroke") {
-
-        }
-        touchEditor.CanvasSettings.selectedShape = null;
-        touchEditor.DeSelectAllShapes();
+    if (this.endTime - this.startTime < 200 && (this.startCords.x === this.endCords.x && this.startCords.y === this.endCords.y) && ctEditor.canvasSettings.selectedShape !== null) {
+        this.createDefaultShapeFromType(ctEditor.canvasSettings.selectedShape, this.endCords.x, this.startCords.y);
     }
 }
+
+CanvasState.prototype.createDefaultShapeFromType = function(shapeType, x, y) {
+    if(ctEditor.canvasSettings.selectedShape === "circle") {
+        this.addShape(new Shape(ctEditor.canvasSettings.selectedShape, x - 30, y - 30, 60, 60, null, "black)", 30));
+    } else if(ctEditor.canvasSettings.selectedShape === "rect") {
+        this.addShape(new Shape(ctEditor.canvasSettings.selectedShape, x - 15, y - 15, 30, 30, null, "rgba(0,255,0,.6)"));
+    } else if(ctEditor.canvasSettings.selectedShape === "line") {
+        this.addShape(new Shape(ctEditor.canvasSettings.selectedShape, x - 25, y - 2, 60, 5, null, "#CCCCCC"));
+    } else if(ctEditor.canvasSettings.selectedShape === "text") {
+        // TODO: Do Stuff related to text
+    } else if(ctEditor.canvasSettings.selectedShape === "stroke") {
+        // for now just do nothing...
+    }
+    ctEditor.canvasSettings.selectedShape = null;
+    ctEditor.deSelectAllShapes();
+}
+
 
 function roundedRect(ctx,x,y,width,height,radius){
   ctx.beginPath();

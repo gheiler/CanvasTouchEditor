@@ -221,52 +221,53 @@ td { vertical-align: top; }
 .te-toolbox .btn-container {
     width: 12%;
     float: left;
-    height: 99%;
-    padding: 1%;
+    height: 100%;
     box-sizing: border-box;
 }
 .te-toolbox .circle {
     border: 1px solid black;
     border-radius: 2em;
-    height: 40px;
-    width: 40px;
-    margin: 0 auto;
-    margin-top: 7px;
+    height: 35px;
+    width: 35px;
+    margin: 14px auto;
 }
 
 .te-toolbox .rect {
     border: 1px solid black;
-    height: 40px;
-    width: 40px;
-    margin: 0 auto;
-    margin-top: 7px;
+    height: 35px;
+    width: 35px;
+    margin: 14px auto;
 }
 .te-toolbox .line {
     margin: 5px auto;
-    width: 45px;
+    width: 35px;
     height: 5px;
     background-color: black;
-    margin-top: 26px;
+    margin-top: 30px;
 }
 .te-toolbox .text {
-    margin: 0 auto;
-    margin-top: 16px;
+    margin: 5px auto;
+    margin-top: 20px;
     text-align: center;
 }
 
 .te-toolbox .img {
-    margin: 0 auto;
-    margin-top: 5px;
+    margin: 14px auto;
     background-image: url(../img/ui/upload.png);
-    height: 45px;
-    width: 45px;
+    background-size: 35px;
+    height: 35px;
+    width: 35px;
 }
 .te-toolbox .stroke {
     background-image: url(../img/shapes/stroke.png);
-    margin: 0 auto;
-    margin-top: 7px;
-    height: 45px;
-    width: 45px;
+    background-size: 35px;
+    margin: 14px auto;
+    height: 35px;
+    width: 35px;
+}
+
+.te-toolbox .actions {
+    
 }
 
 .te-toolbox {

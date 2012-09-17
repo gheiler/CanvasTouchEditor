@@ -1,12 +1,14 @@
 /* Author: Gabriel Heiler */
 /*global document: false, window: false, console: false */
 
+var foregroundColorSelector;
+
 var ctEditor = {
-    canvasSettings: { canvasHeight: 80, canvasWidth: 100, toolBoxHeight: 20, toolBoxWidth: 100, toolBoxRealWidth: null, containerSelector: null, selectedShape: null },
+    settings: { canvasHeight: 90, canvasWidth: 100, toolBoxHeight: 20, toolBoxWidth: 100, toolBoxRealWidth: null, containerSelector: null, selectedShape: null, foregroundColor: { r: 0, g: 0, b: 0} },
     shapeType: { cirlce: "circle", rect: "rect", line: "line", stroke: "stroke", img: "img" },
-    InitWithContainer: function (selector) {
+    initWithContainer: function (selector) {
         "use strict";
-        this.canvasSettings.containerSelector = selector;
+        this.settings.containerSelector = selector;
         this.createToolBox();
         this.createCanvas();
     },
@@ -14,7 +16,7 @@ var ctEditor = {
         "use strict";
         // declare scope Vars
         var realHeight, realWidth, canvas, container, s;
-        container = document.getElementById(this.canvasSettings.containerSelector);
+        container = document.getElementById(this.settings.containerSelector);
         if (container) {
             // set height and width of the container I received to maximun
             container.style.width = "100%";
@@ -24,8 +26,8 @@ var ctEditor = {
             realWidth = parseInt(window.getComputedStyle(container, null).getPropertyValue("width").split("px").join(""), 10);
             // create the canvas with the values
             canvas = document.createElement("canvas");
-            canvas.setAttribute("width", (realWidth * this.canvasSettings.canvasWidth) / 100 + "px");
-            canvas.setAttribute("height", (realHeight * this.canvasSettings.canvasHeight) / 100 + "px");
+            canvas.setAttribute("width", (realWidth * this.settings.canvasWidth) / 100 + "px");
+            canvas.setAttribute("height", ((realHeight * this.settings.canvasHeight) - 65) / 100 + "px");
             canvas.style.backgroundImage = "url(../img/bg/noise.png)";
 
             canvas.setAttribute("id", "te_canvas");
@@ -40,29 +42,30 @@ var ctEditor = {
         "use strict";
         // declare scope Vars
         var realHeight, realWidth, toolBox, container, buttonPadTop = 10, buttonPadLeft = 10, buttonSizeHeight = 20, buttonSizeWidth;
-        container = document.getElementById(this.canvasSettings.containerSelector);
+        container = document.getElementById(this.settings.containerSelector);
         if (container) {
+
             // set height and width of the container I received to maximun
             container.style.width = "100%";
             container.style.height = "100%";
+
             // then get the real height and width of the container
             realHeight = parseInt(window.getComputedStyle(container, null).getPropertyValue("height"), 10);
             realWidth = parseInt(window.getComputedStyle(container, null).getPropertyValue("width"), 10);
-            var calcHeight = (realHeight * this.canvasSettings.toolBoxHeight) / 100;
-            if (calcHeight > 95) { calcHeight = 95; }
+            var calcHeight = (realHeight * this.settings.toolBoxHeight) / 100;
+            if (calcHeight > 65) { calcHeight = 65; }
             this.toolBoxRealWidth = calcHeight;
-            // create the canvas with the values
+
+            // create a div container
             toolBox = document.createElement("div");
-            toolBox.setAttribute("width", (realWidth * this.canvasSettings.toolBoxWidth) / 100 + "px");
+            toolBox.setAttribute("width", (realWidth * this.settings.toolBoxWidth) / 100 + "px");
             toolBox.setAttribute("height", calcHeight + "px");
             toolBox.style.height = calcHeight + "px";
             toolBox.setAttribute("id", "te_toolbox");
             toolBox.setAttribute("class", "te-toolbox");
             container.appendChild(toolBox);
 
-            // create a div button container
-
-            //draw a circle
+            //draw selectable shapes
             this.drawToolBoxShape("circle", toolBox);
             this.drawToolBoxShape("rect", toolBox);
             this.drawToolBoxShape("line", toolBox);
@@ -73,6 +76,7 @@ var ctEditor = {
 
             // draw more stuff
             // TODO: draw stroke and fill color picker, stroke wide, undo, redo, rubber, clear all, save
+            this.drawToolBoxActions(toolBox);
 
         } else {
             console.log("Could not find the canvas container");
@@ -93,12 +97,57 @@ var ctEditor = {
         btnCont.appendChild(shape);
         toolBox.appendChild(btnCont);
     },
+    drawToolBoxActions: function (toolBox) {
+        "use strict";
+        // create a div button container
+        var btnCont = document.createElement("div");
+        btnCont.setAttribute("class", "btn-container");
+
+        //draw actions
+
+        var undo = document.createElement("div");
+        undo.setAttribute("class", "undo");
+        undo.setAttribute("onclick", "ctEditor.undo()");
+        btnCont.appendChild(undo);
+
+        var redo = document.createElement("div");
+        redo.setAttribute("class", "redo");
+        redo.setAttribute("onclick", "ctEditor.redo()");
+        btnCont.appendChild(redo);
+
+        var colorPicker = document.createElement("div");
+        colorPicker.setAttribute("class", "color-picker");
+        colorPicker.setAttribute("onclick", "ctEditor.toggleColorPicker(this)");
+        var palette = new Palette();
+        foregroundColorSelector = new ColorSelector(palette);
+        foregroundColorSelector.container.addEventListener('mousedown', onForegroundColorSelectorMouseDown, false);
+        foregroundColorSelector.container.addEventListener('touchstart', onForegroundColorSelectorTouchStart, false);
+        colorPicker.appendChild(foregroundColorSelector.container);
+        colorPicker.style.backgroundColor = "rgb(" + this.settings.foregroundColor.r + "," + this.settings.foregroundColor.g + "," + this.settings.foregroundColor.b + ")";
+        btnCont.appendChild(colorPicker);
+
+        var plusLineWidth = document.createElement("div");
+        plusLineWidth.setAttribute("class", "plus-line-width");
+        plusLineWidth.setAttribute("onclick", "ctEditor.plusLineWidth()");
+        btnCont.appendChild(plusLineWidth);
+
+        var lineWidth = document.createElement("div");
+        lineWidth.setAttribute("class", "line-width");
+        btnCont.appendChild(lineWidth);
+
+        var minusLineWidth = document.createElement("div");
+        minusLineWidth.setAttribute("class", "minus-line-width");
+        minusLineWidth.setAttribute("onclick", "ctEditor.minusLineWidth()");
+        btnCont.appendChild(minusLineWidth);
+
+        toolBox.appendChild(btnCont);
+    },
     setShape: function (el, type) {
         "use strict";
-        this.canvasSettings.selectedShape = type;
-        var divShape = document.getElementById(this.canvasSettings.containerSelector);
+        this.settings.selectedShape = type;
+        var divShape = document.getElementById(this.settings.containerSelector);
         this.deSelectAllShapes();
-        el.style.border = "1px #CCC   solid";
+        el.style.border = "1px #CCC solid";
         if (type === this.shapeType.stroke) {
             myState.stroke = true;
             myState.addShape(new Shape("stroke", null, null, 0, 0, null, null));
@@ -117,17 +166,62 @@ var ctEditor = {
     }
 };
 
+function setForegroundColor( x, y ) {
+	foregroundColorSelector.update( x, y );
+	COLOR = foregroundColorSelector.getColor();
+	ctEditor.settings.foregroundColor = COLOR;
+}
 
-/* CODE FROM: http://simonsarris.com*/
+function onForegroundColorSelectorMouseDown( event ) {
+	window.addEventListener('mousemove', onForegroundColorSelectorMouseMove, false);
+	window.addEventListener('mouseup', onForegroundColorSelectorMouseUp, false);
+	setForegroundColor( event.clientX - foregroundColorSelector.container.offsetLeft, event.clientY - foregroundColorSelector.container.offsetTop );	
+}
 
-// By Simon Sarris
+function onForegroundColorSelectorMouseMove( event ) {
+	setForegroundColor( event.clientX - foregroundColorSelector.container.offsetLeft, event.clientY - foregroundColorSelector.container.offsetTop );
+}
+
+function onForegroundColorSelectorMouseUp( event ) {
+	window.removeEventListener('mousemove', onForegroundColorSelectorMouseMove, false);
+	window.removeEventListener('mouseup', onForegroundColorSelectorMouseUp, false);
+	setForegroundColor( event.clientX - foregroundColorSelector.container.offsetLeft, event.clientY - foregroundColorSelector.container.offsetTop );
+}
+
+function onForegroundColorSelectorTouchStart( event ) {
+	if(event.touches.length == 1) {
+		event.preventDefault();
+		setForegroundColor( event.touches[0].pageX - foregroundColorSelector.container.offsetLeft, event.touches[0].pageY - foregroundColorSelector.container.offsetTop );
+		window.addEventListener('touchmove', onForegroundColorSelectorTouchMove, false);
+		window.addEventListener('touchend', onForegroundColorSelectorTouchEnd, false);
+	}
+}
+
+function onForegroundColorSelectorTouchMove( event ) {
+	if(event.touches.length == 1) {
+		event.preventDefault();
+		setForegroundColor( event.touches[0].pageX - foregroundColorSelector.container.offsetLeft, event.touches[0].pageY - foregroundColorSelector.container.offsetTop );
+	}
+}
+
+function onForegroundColorSelectorTouchEnd( event ) {
+	if(event.touches.length == 0) {
+		event.preventDefault();
+		window.removeEventListener('touchmove', onForegroundColorSelectorTouchMove, false);
+		window.removeEventListener('touchend', onForegroundColorSelectorTouchEnd, false);
+	}	
+}
+
+
+// Thanks to:
+// Simon Sarris
 // www.simonsarris.com
 // sarris@acm.org
+// http://simonsarris.com
 //
-// Last update December 2011
+// for: canvasState, shapes and draw.
 //
-// Free to use and distribute at will
-// So long as you are nice to people, etc
+// customized by Gabriel Heiler
 
 // Holds the state of the canvas context
 var myState;
@@ -300,7 +394,7 @@ function CanvasState(canvas) {
     
     function mouseXY(e) {
         // TODO: Compare with CanvasState.prototype.getMouse and look one is better
-        var can = document.getElementById(ctEditor.canvasSettings.containerSelector);
+        var can = document.getElementById(ctEditor.settings.containerSelector);
         if(!e) e = event;
         return {
             x: e.pageX - can.offsetLeft,
@@ -309,7 +403,7 @@ function CanvasState(canvas) {
     }
     function touchXY(e) {
         // TODO: Compare with CanvasState.prototype.getMouse and look one is better
-        var can = document.getElementById(ctEditor.canvasSettings.containerSelector);
+        var can = document.getElementById(ctEditor.settings.containerSelector);
         if(!e) e = event;
         e.preventDefault();
         return { 
@@ -370,8 +464,8 @@ function CanvasState(canvas) {
     // double click for making new shapes
     canvas.addEventListener('dblclick', function (e) {
         var mouse = myState.getPosition(e);
-        if (ctEditor.canvasSettings.selectedShape !== null) {
-            myState.createDefaultShapeFromType(ctEditor.canvasSettings.selectedShape, mouse.x, mouse.y);
+        if (ctEditor.settings.selectedShape !== null) {
+            myState.createDefaultShapeFromType(ctEditor.settings.selectedShape, mouse.x, mouse.y);
         }
     }, true);
 
@@ -455,24 +549,24 @@ CanvasState.prototype.getPosition = function(e) {
 
 CanvasState.prototype.checkTouchClick = function () {
     // TODO: move to add default/userdefined shape function
-    if (this.endTime - this.startTime < 200 && (this.startCords.x === this.endCords.x && this.startCords.y === this.endCords.y) && ctEditor.canvasSettings.selectedShape !== null) {
-        this.createDefaultShapeFromType(ctEditor.canvasSettings.selectedShape, this.endCords.x, this.startCords.y);
+    if (this.endTime - this.startTime < 200 && (this.startCords.x === this.endCords.x && this.startCords.y === this.endCords.y) && ctEditor.settings.selectedShape !== null) {
+        this.createDefaultShapeFromType(ctEditor.settings.selectedShape, this.endCords.x, this.startCords.y);
     }
 }
 
 CanvasState.prototype.createDefaultShapeFromType = function(shapeType, x, y) {
-    if(ctEditor.canvasSettings.selectedShape === "circle") {
-        this.addShape(new Shape(ctEditor.canvasSettings.selectedShape, x - 30, y - 30, 60, 60, null, "black)", 30));
-    } else if(ctEditor.canvasSettings.selectedShape === "rect") {
-        this.addShape(new Shape(ctEditor.canvasSettings.selectedShape, x - 15, y - 15, 30, 30, null, "rgba(0,255,0,.6)"));
-    } else if(ctEditor.canvasSettings.selectedShape === "line") {
-        this.addShape(new Shape(ctEditor.canvasSettings.selectedShape, x - 25, y - 2, 60, 5, null, "#CCCCCC"));
-    } else if(ctEditor.canvasSettings.selectedShape === "text") {
+    if(ctEditor.settings.selectedShape === "circle") {
+        this.addShape(new Shape(ctEditor.settings.selectedShape, x - 30, y - 30, 60, 60, null, "black)", 30));
+    } else if(ctEditor.settings.selectedShape === "rect") {
+        this.addShape(new Shape(ctEditor.settings.selectedShape, x - 15, y - 15, 30, 30, null, "rgba(0,255,0,.6)"));
+    } else if(ctEditor.settings.selectedShape === "line") {
+        this.addShape(new Shape(ctEditor.settings.selectedShape, x - 25, y - 2, 60, 5, null, "#CCCCCC"));
+    } else if(ctEditor.settings.selectedShape === "text") {
         // TODO: Do Stuff related to text
-    } else if(ctEditor.canvasSettings.selectedShape === "stroke") {
+    } else if(ctEditor.settings.selectedShape === "stroke") {
         // for now just do nothing...
     }
-    ctEditor.canvasSettings.selectedShape = null;
+    ctEditor.settings.selectedShape = null;
     ctEditor.deSelectAllShapes();
 }
 

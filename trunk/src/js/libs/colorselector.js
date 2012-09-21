@@ -24,7 +24,10 @@ ColorSelector.prototype =
 		this.container.style.position = 'absolute';
 		this.container.style.width = '250px';
 		this.container.style.height = '250px';
+        this.container.style.left = '40%';
+		this.container.style.top = '33%';
 		this.container.style.visibility = 'hidden';
+        this.container.style.display = 'none';
 		this.container.style.cursor = 'pointer';
 
 		this.hue = document.createElement("canvas");
@@ -159,6 +162,6 @@ ColorSelector.prototype =
 		x = Math.floor(this.luminosityPosition[0]);
 		y = Math.floor(this.luminosityPosition[1]);
 		
-		return [ this.luminosityData[(x + (y * 250)) * 4], this.luminosityData[(x + (y * 250)) * 4 + 1], this.luminosityData[(x + (y * 250)) * 4 + 2] ];
+		return { r: this.luminosityData[(x + (y * 250)) * 4], g: this.luminosityData[(x + (y * 250)) * 4 + 1], b: this.luminosityData[(x + (y * 250)) * 4 + 2] };
 	}
 }

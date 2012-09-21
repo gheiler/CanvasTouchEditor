@@ -218,22 +218,31 @@ td { vertical-align: top; }
    Author: Gabriel Heiler
    ========================================================================== */
 
+.te-toolbox {
+    border-bottom: 2px solid black;
+}
 .te-toolbox .btn-container {
     width: 12%;
     float: left;
     height: 100%;
     box-sizing: border-box;
 }
+.te-toolbox .btn-container.actions {
+    width: 24%;
+}
+.te-toolbox .btn-container div {
+    cursor: pointer;
+}
+
 .te-toolbox .circle {
-    border: 1px solid black;
+    border: 2px solid black;
     border-radius: 2em;
     height: 35px;
     width: 35px;
     margin: 14px auto;
 }
-
 .te-toolbox .rect {
-    border: 1px solid black;
+    border: 2px solid black;
     height: 35px;
     width: 35px;
     margin: 14px auto;
@@ -250,7 +259,6 @@ td { vertical-align: top; }
     margin-top: 20px;
     text-align: center;
 }
-
 .te-toolbox .img {
     margin: 14px auto;
     background-image: url(../img/ui/upload.png);
@@ -266,17 +274,39 @@ td { vertical-align: top; }
     width: 35px;
 }
 
-.te-toolbox .actions {
+.te-toolbox .color-picker, .te-toolbox .undo, .te-toolbox .redo, .te-toolbox .plus-line-width, te-toolbox .minus-line-width, .te-toolbox .minus-line-width {
+    height: 24px;
+    width: 24px;
+    margin-left: 15px;
+    margin-top: 5px;
+    float: left;
+    background-repeat: no-repeat; 
+}
+.te-toolbox .undo {
+    background: url(../img/ui/undo.png);
+}
+.te-toolbox .redo {
+    background: url(../img/ui/redo.png);
+}
+.te-toolbox .color-picker {
     
 }
-
-.te-toolbox {
-    border-bottom: 2px solid black;
+.te-toolbox .plus-line-width {
+    background: url(../img/ui/add.png);
+}
+.te-toolbox .minus-line-width {
+    background: url(../img/ui/remove.png);
+}
+.te-toolbox .line-width {
+    width: 24px;
+    height: 1px;
+    float: left;
+    margin-top: 17px;
+    margin-left: 15px;
+    background-color: #000;
+    cursor: default;
 }
 
-.te-toolbox .btn-container div {
-    cursor: pointer;
-}
 
 
 /* ==|== media queries ======================================================

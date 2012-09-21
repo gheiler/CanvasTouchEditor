@@ -101,7 +101,7 @@ var ctEditor = {
         "use strict";
         // create a div button container
         var btnCont = document.createElement("div");
-        btnCont.setAttribute("class", "btn-container");
+        btnCont.setAttribute("class", "btn-container actions");
 
         //draw actions
 
@@ -142,12 +142,15 @@ var ctEditor = {
 
         toolBox.appendChild(btnCont);
     },
+    toggleColorPicker: function (el) {
+        el.childNodes[0].toggle();
+    },
     setShape: function (el, type) {
         "use strict";
         this.settings.selectedShape = type;
         var divShape = document.getElementById(this.settings.containerSelector);
         this.deSelectAllShapes();
-        el.style.border = "1px #CCC solid";
+        el.style.border = "2px #CCC solid";
         if (type === this.shapeType.stroke) {
             myState.stroke = true;
             myState.addShape(new Shape("stroke", null, null, 0, 0, null, null));
@@ -163,32 +166,37 @@ var ctEditor = {
         for (i = 0; i < total; i++) {
             shapesContainers[i].style.border = "none";
         }
+    },
+    getForegroundColorString: function (){
+        return "rgb(" + this.settings.foregroundColor.r + "," + this.settings.foregroundColor.g + "," + this.settings.foregroundColor.b + ")";
     }
 };
 
-function setForegroundColor( x, y ) {
+function setForegroundColor(x, y) {
 	foregroundColorSelector.update( x, y );
 	COLOR = foregroundColorSelector.getColor();
 	ctEditor.settings.foregroundColor = COLOR;
+    document.getElementsByClassName("color-picker")[0].style.backgroundColor = "rgb(" + ctEditor.settings.foregroundColor.r + "," + ctEditor.settings.foregroundColor.g + "," + ctEditor.settings.foregroundColor.b + ")";
+    //document.getElementsByClassName("color-picker")[0].style.backgroudColor = "#cccccc";
 }
 
-function onForegroundColorSelectorMouseDown( event ) {
+function onForegroundColorSelectorMouseDown(event) {
 	window.addEventListener('mousemove', onForegroundColorSelectorMouseMove, false);
 	window.addEventListener('mouseup', onForegroundColorSelectorMouseUp, false);
 	setForegroundColor( event.clientX - foregroundColorSelector.container.offsetLeft, event.clientY - foregroundColorSelector.container.offsetTop );	
 }
 
-function onForegroundColorSelectorMouseMove( event ) {
+function onForegroundColorSelectorMouseMove(event) {
 	setForegroundColor( event.clientX - foregroundColorSelector.container.offsetLeft, event.clientY - foregroundColorSelector.container.offsetTop );
 }
 
-function onForegroundColorSelectorMouseUp( event ) {
+function onForegroundColorSelectorMouseUp(event) {
 	window.removeEventListener('mousemove', onForegroundColorSelectorMouseMove, false);
 	window.removeEventListener('mouseup', onForegroundColorSelectorMouseUp, false);
 	setForegroundColor( event.clientX - foregroundColorSelector.container.offsetLeft, event.clientY - foregroundColorSelector.container.offsetTop );
 }
 
-function onForegroundColorSelectorTouchStart( event ) {
+function onForegroundColorSelectorTouchStart(event) {
 	if(event.touches.length == 1) {
 		event.preventDefault();
 		setForegroundColor( event.touches[0].pageX - foregroundColorSelector.container.offsetLeft, event.touches[0].pageY - foregroundColorSelector.container.offsetTop );
@@ -197,19 +205,19 @@ function onForegroundColorSelectorTouchStart( event ) {
 	}
 }
 
-function onForegroundColorSelectorTouchMove( event ) {
+function onForegroundColorSelectorTouchMove(event) {
 	if(event.touches.length == 1) {
 		event.preventDefault();
 		setForegroundColor( event.touches[0].pageX - foregroundColorSelector.container.offsetLeft, event.touches[0].pageY - foregroundColorSelector.container.offsetTop );
 	}
 }
 
-function onForegroundColorSelectorTouchEnd( event ) {
-	if(event.touches.length == 0) {
-		event.preventDefault();
-		window.removeEventListener('touchmove', onForegroundColorSelectorTouchMove, false);
-		window.removeEventListener('touchend', onForegroundColorSelectorTouchEnd, false);
-	}	
+function onForegroundColorSelectorTouchEnd(event) {
+    if (event.touches.length == 0) {
+        event.preventDefault();
+        window.removeEventListener('touchmove', onForegroundColorSelectorTouchMove, false);
+        window.removeEventListener('touchend', onForegroundColorSelectorTouchEnd, false);
+    }
 }
 
 
@@ -420,7 +428,7 @@ function CanvasState(canvas) {
             myState.selection.y = cords.y - myState.dragoffy;
             myState.valid = false; // Something's dragging so we must redraw
         } else if(myState.stroking) {
-            myState.addShape(new Shape("stroke", cords.x, cords.y, 0, 0, null, null));
+            myState.addShape(new Shape("stroke", cords.x, cords.y, 0, 0, ctEditor.getForegroundColorString(), null));
         }
     }
     function shapeStartsMoving(cords) {
@@ -556,11 +564,11 @@ CanvasState.prototype.checkTouchClick = function () {
 
 CanvasState.prototype.createDefaultShapeFromType = function(shapeType, x, y) {
     if(ctEditor.settings.selectedShape === "circle") {
-        this.addShape(new Shape(ctEditor.settings.selectedShape, x - 30, y - 30, 60, 60, null, "black)", 30));
+        this.addShape(new Shape(ctEditor.settings.selectedShape, x - 30, y - 30, 60, 60, null, ctEditor.getForegroundColorString(), 30));
     } else if(ctEditor.settings.selectedShape === "rect") {
-        this.addShape(new Shape(ctEditor.settings.selectedShape, x - 15, y - 15, 30, 30, null, "rgba(0,255,0,.6)"));
+        this.addShape(new Shape(ctEditor.settings.selectedShape, x - 15, y - 15, 30, 30, null, ctEditor.getForegroundColorString()));
     } else if(ctEditor.settings.selectedShape === "line") {
-        this.addShape(new Shape(ctEditor.settings.selectedShape, x - 25, y - 2, 60, 5, null, "#CCCCCC"));
+        this.addShape(new Shape(ctEditor.settings.selectedShape, x - 25, y - 2, 60, 5, null, ctEditor.getForegroundColorString()));
     } else if(ctEditor.settings.selectedShape === "text") {
         // TODO: Do Stuff related to text
     } else if(ctEditor.settings.selectedShape === "stroke") {

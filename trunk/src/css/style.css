@@ -228,10 +228,29 @@ td { vertical-align: top; }
     box-sizing: border-box;
 }
 .te-toolbox .btn-container.actions {
-    width: 24%;
+    width: 28%;
 }
 .te-toolbox .btn-container div {
     cursor: pointer;
+}
+.ct-text-input {
+    position: absolute;
+    width: 50%;
+    display: none;
+    visibility: hidden;
+}
+.ct-text-input input {
+    width: 100%;
+    min-width: 250px;
+}
+.ct-text-input .btn-ok {
+    height: 16px;
+    width: 16px;
+    background-image: url(../img/ui/check.png);
+    cursor: pointer;
+    margin-top: -23px;
+    position: absolute;
+    margin-left: 96%;
 }
 
 .te-toolbox .circle {
@@ -262,13 +281,13 @@ td { vertical-align: top; }
 .te-toolbox .img {
     margin: 14px auto;
     background-image: url(../img/ui/upload.png);
-    background-size: 35px;
+    background-size: 100%;
     height: 35px;
     width: 35px;
 }
 .te-toolbox .stroke {
-    background-image: url(../img/shapes/stroke.png);
-    background-size: 35px;
+    background-image: url(../img/shapes/paint.png);
+    background-size: 100%;
     margin: 14px auto;
     height: 35px;
     width: 35px;
@@ -307,7 +326,20 @@ td { vertical-align: top; }
     cursor: default;
 }
 
-
+.ct-shape-actions {
+    width: 100%;
+    height: 30px;
+    position: absolute;
+    bottom: 0;
+    display: none;
+}
+.ct-shape-actions div {
+    height: 24px;
+    width: 24px;
+    float: left;
+    margin-top: 3px;
+    margin-left: 5px;
+}
 
 /* ==|== media queries ======================================================
    EXAMPLE Media Query for Responsive Design.
@@ -318,8 +350,22 @@ td { vertical-align: top; }
 @media only screen and (min-width: 35em) {
   /* Style adjustments for viewports that meet the condition */
 }
-
-
+@media only screen and (max-width: 450px) {
+    .te-toolbox .line-width {
+        margin-left: 10px;
+        width: 20px;
+    }
+    .te-toolbox .color-picker, .te-toolbox .undo, .te-toolbox .redo, .te-toolbox .plus-line-width, te-toolbox .minus-line-width, .te-toolbox .minus-line-width {
+        margin-left: 5px;
+    }
+    .te-toolbox .circle, .te-toolbox .rect, .te-toolbox .line, .te-toolbox .img, .te-toolbox .stroke {
+        height: 30px;
+        width:  30px;
+    }
+    .te-toolbox .line {
+        height: 5px;
+    }
+}
 
 /* ==|== non-semantic helper classes ========================================
    Please define your styles before this section.

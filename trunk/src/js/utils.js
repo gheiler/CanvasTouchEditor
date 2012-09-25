@@ -209,12 +209,12 @@ if (!String.prototype.normalize) {
 }
 if (!Element.prototype.toggle) {
     Element.prototype.toggle = function () {
-        if (this.style.display === "none") {
+        if (getComputedStyle(this).display === "none") {
             this.style.display = "block";
         } else { 
             this.style.display = "none";
         }
-        if (this.style.visibility === "hidden" && this.style.display === "block") {
+        if (getComputedStyle(this).visibility === "hidden" && getComputedStyle(this).display === "block") {
             this.style.visibility = "visible";
         } else { 
             this.style.visibility = "hidden";

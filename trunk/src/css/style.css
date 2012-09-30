@@ -220,6 +220,7 @@ td { vertical-align: top; }
 
 .te-toolbox {
     border-bottom: 2px solid black;
+    background-image: url(../img/bg/noise.png);
 }
 .te-toolbox .btn-container {
     width: 12%;
@@ -332,6 +333,8 @@ td { vertical-align: top; }
     position: absolute;
     bottom: 0;
     display: none;
+    background-image: url(../img/bg/noise.png);
+    border-top: 1px solid #000;
 }
 .ct-shape-actions div {
     height: 24px;
@@ -340,6 +343,37 @@ td { vertical-align: top; }
     margin-top: 3px;
     margin-left: 5px;
 }
+.ct-shape-actions div.plus-width {
+    background-image: url(../img/ui/plus-width.png);
+}
+.ct-shape-actions div.rotate-left {
+    background-image: url(../img/ui/rotate-left.png);
+}
+.ct-shape-actions div.rotate-right {
+    background-image: url(../img/ui/rotate-right.png);
+}
+.ct-shape-actions div.plus-width {
+    background-image: url(../img/ui/plus-width.png);
+}
+.ct-shape-actions div.minus-width {
+    background-image: url(../img/ui/minus-width.png);
+}
+.ct-shape-actions div.plus-height {
+    background-image: url(../img/ui/plus-height.png);
+}
+.ct-shape-actions div.minus-height {
+    background-image: url(../img/ui/minus-height.png);
+}
+.ct-shape-actions div.minus-z-index {
+    background-image: url(../img/ui/minus-z-index.png);
+}
+.ct-shape-actions div.plus-z-index {
+    background-image: url(../img/ui/plus-z-index.png);
+}
+.ct-shape-actions div.remove {
+    background-image: url(../img/ui/recycle.png);
+}
+
 
 /* ==|== media queries ======================================================
    EXAMPLE Media Query for Responsive Design.
@@ -350,7 +384,13 @@ td { vertical-align: top; }
 @media only screen and (min-width: 35em) {
   /* Style adjustments for viewports that meet the condition */
 }
-@media only screen and (max-width: 450px) {
+@media only screen and (max-width: 450px), only screen and (max-height: 280px) {
+    .te-toolbox .btn-container {
+        width: 10.5%;
+    }
+    .te-toolbox .btn-container.actions {
+        width: 37%;
+    }
     .te-toolbox .line-width {
         margin-left: 10px;
         width: 20px;
@@ -359,8 +399,8 @@ td { vertical-align: top; }
         margin-left: 5px;
     }
     .te-toolbox .circle, .te-toolbox .rect, .te-toolbox .line, .te-toolbox .img, .te-toolbox .stroke {
-        height: 30px;
-        width:  30px;
+        height: 25px;
+        width:  25px;
     }
     .te-toolbox .line {
         height: 5px;

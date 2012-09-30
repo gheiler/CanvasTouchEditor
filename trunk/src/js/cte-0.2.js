@@ -1,4 +1,5 @@
 /* Author: Gabriel Heiler 
+   Version: 0.2
    Code: https://github.com/gheiler/CanvasTouchEditor
    License: Everyone, to do whatever they want.
 */
@@ -7,7 +8,7 @@
 var foregroundColorSelector;
 
 var ctEditor = {
-    settings: { canvasHeight: 90, canvasWidth: 100, toolBoxHeight: 20, toolBoxWidth: 100, toolBoxRealWidth: null, containerSelector: null, selectedShape: null, foregroundColor: { r: 0, g: 0, b: 0 }, unDoneStrokes: null, lineWidth: 1, fontSize: 30, whomColor: null },
+    settings: { canvasHeight: 100, canvasWidth: 100, toolBoxHeight: 20, toolBoxWidth: 100, toolBoxRealHeight: null, containerSelector: null, selectedShape: null, foregroundColor: { r: 0, g: 0, b: 0 }, unDoneStrokes: null, lineWidth: 1, fontSize: 30, whomColor: null },
     shapeType: { cirlce: "circle", rect: "rect", line: "line", stroke: "stroke", img: "img", text: "text" },
     initWithContainer: function (selector) {
         "use strict";
@@ -24,14 +25,15 @@ var ctEditor = {
             // set height and width of the container I received to maximun
             container.style.width = "100%";
             container.style.height = "100%";
+            container.style.overflow = "hidden";
             // then get the real height and width of the container
-            realHeight = parseInt(window.getComputedStyle(container, null).getPropertyValue("height").split("px").join(""), 10); //* 1.075
+            realHeight = parseInt(window.getComputedStyle(container, null).getPropertyValue("height").split("px").join(""), 10);
             realWidth = parseInt(window.getComputedStyle(container, null).getPropertyValue("width").split("px").join(""), 10);
             // create the canvas with the values
             canvas = document.createElement("canvas");
             canvas.setAttribute("width", (realWidth * this.settings.canvasWidth) / 100 + "px");
-            canvas.setAttribute("height", ((realHeight * this.settings.canvasHeight) - 65) / 100 + "px");
-            canvas.style.backgroundImage = "url(../img/bg/noise.png)";
+            canvas.setAttribute("height", ((realHeight * this.settings.canvasHeight) / 100) - this.toolBoxRealHeight + "px");
+            //canvas.style.backgroundImage = "url(../img/bg/noise.png)";
 
             canvas.setAttribute("id", "te_canvas");
             container.appendChild(canvas);
@@ -56,7 +58,7 @@ var ctEditor = {
             realWidth = parseInt(window.getComputedStyle(container, null).getPropertyValue("width"), 10);
             var calcHeight = (realHeight * this.settings.toolBoxHeight) / 100;
             if (calcHeight > 65) { calcHeight = 65; }
-            this.toolBoxRealWidth = calcHeight;
+            this.toolBoxRealHeight = calcHeight;
 
             // create a div container
             toolBox = document.createElement("div");
@@ -219,6 +221,12 @@ var ctEditor = {
         el.childNodes[0].value = "";
         el.childNodes[0].focus()
     },
+    showShapeActionBar: function () {
+        document.getElementsByClassName("ct-shape-actions")[0].show();
+    },
+    hideShapeActionBar: function () {
+        document.getElementsByClassName("ct-shape-actions")[0].hide();
+    },
     drawText: function () {
         "use strict";
         var text = document.getElementById("cte-txtText").value;
@@ -235,12 +243,12 @@ var ctEditor = {
         //draw actions
 
         var rotateLeft = document.createElement("div");
-        rotateLeft.setAttribute("class", "rotateLeft");
+        rotateLeft.setAttribute("class", "rotate-left");
         rotateLeft.setAttribute("onclick", "ctEditor.rotateLeft()");
         btnCont.appendChild(rotateLeft);
 
         var rotateRight = document.createElement("div");
-        rotateRight.setAttribute("class", "rotateRight");
+        rotateRight.setAttribute("class", "rotate-right");
         rotateRight.setAttribute("onclick", "ctEditor.rotateRight()");
         btnCont.appendChild(rotateRight);
 
@@ -262,26 +270,80 @@ var ctEditor = {
         btnCont.appendChild(minusWidth);
 
         var plusHeight = document.createElement("div");
-        plusHeight.setAttribute("class", "plus-width");
+        plusHeight.setAttribute("class", "plus-height");
         plusHeight.setAttribute("onclick", "ctEditor.plusHeight()");
         btnCont.appendChild(plusHeight);
 
         var minusHeight = document.createElement("div");
-        minusHeight.setAttribute("class", "minus-width");
+        minusHeight.setAttribute("class", "minus-height");
         minusHeight.setAttribute("onclick", "ctEditor.minusHeight()");
         btnCont.appendChild(minusHeight);
 
         var minusZIndex = document.createElement("div");
-        minusZIndex.setAttribute("class", "minus-width");
+        minusZIndex.setAttribute("class", "minus-z-index");
         minusZIndex.setAttribute("onclick", "ctEditor.minusZIndex()");
         btnCont.appendChild(minusZIndex);
 
         var plusZIndex = document.createElement("div");
-        plusZIndex.setAttribute("class", "minus-width");
+        plusZIndex.setAttribute("class", "plus-z-index");
         plusZIndex.setAttribute("onclick", "ctEditor.plusZIndex()");
         btnCont.appendChild(plusZIndex);
 
+        var remove = document.createElement("div");
+        remove.setAttribute("class", "remove");
+        remove.setAttribute("onclick", "ctEditor.remove()");
+        btnCont.appendChild(remove);
+
         container.appendChild(btnCont);
+    },
+    rotateLeft: function () {
+        myState.shapes[myState.selectionIndex].angle += 10;
+        myState.valid = false;
+    },
+    rotateRight: function () {
+        myState.shapes[myState.selectionIndex].angle -= 10;
+        myState.valid = false;
+    },
+    plusWidth: function () {
+        myState.shapes[myState.selectionIndex].w += 5;
+        myState.valid = false;
+    },
+    minusWidth: function () {
+        if (myState.shapes[myState.selectionIndex].w > 5) {
+            myState.shapes[myState.selectionIndex].w -= 5;
+            myState.valid = false;
+        }
+    },
+    plusHeight: function () {
+        myState.shapes[myState.selectionIndex].h += 5;
+        myState.valid = false;
+    },
+    minusHeight: function () {
+        if (myState.shapes[myState.selectionIndex].h > 5) {
+            myState.shapes[myState.selectionIndex].h -= 5;
+            myState.valid = false;
+        }
+    },
+    minusZIndex: function () {
+        if (myState.selectionIndex < myState.shapes.length) {
+            myState.shapes.move(myState.selectionIndex, myState.selectionIndex + 1);
+            myState.selectionIndex = myState.selectionIndex + 1;
+            myState.valid = false;
+        }
+    },
+    plusZIndex: function () {
+        if (myState.selectionIndex > 0) {
+            myState.shapes.move(myState.selectionIndex, myState.selectionIndex - 1);
+            myState.selectionIndex = myState.selectionIndex - 1;
+            myState.valid = false;
+        }
+    },
+    remove: function () {
+        myState.shapes.splice(myState.selectionIndex, 1);
+        myState.selection = null;
+        myState.selectionIndex = null;
+        ctEditor.hideShapeActionBar();
+        myState.valid = false;
     }
 };
 
@@ -343,7 +405,7 @@ var myState;
 
 // Constructor for Shape objects to hold data for all drawn objects.
 // For now they will just be defined as rectangles.
-function Shape(type, x, y, w, h, stroke, fill, radius, text, url) {
+function Shape(type, x, y, w, h, stroke, fill, radius, text, url, angle) {
   // This is a very simple and unsafe constructor. All we're doing is checking if the values exist.
   // "x || 0" just means "if there is a value for x, use that. Otherwise use 0."
   // But we aren't checking anything else! We could put "Lalala" for the value of x 
@@ -356,14 +418,17 @@ function Shape(type, x, y, w, h, stroke, fill, radius, text, url) {
   this.text = text || null;
   this.url = url || null;
   this.strokeStyle = stroke || "#000000";
-  this.fillStyle = fill || null;  
+  this.fillStyle = fill || null;
+  this.angle = angle || 0;
 }
 
 // Draws this shape to a given context
 Shape.prototype.draw = function (ctx) {
     ctx.beginPath();
     ctx.strokeStyle = this.strokeStyle;
-
+    ctx.save();
+    //ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle * Math.PI / 180);
     switch (this.type) {
         case ctEditor.shapeType.rect:
             ctx.rect(this.x, this.y, this.w, this.h);
@@ -412,7 +477,7 @@ Shape.prototype.draw = function (ctx) {
     } else {
         ctx.stroke();
     }
-
+    ctx.restore();
 }
 
 // Determine if a point is inside the shape's bounds
@@ -554,6 +619,7 @@ Shape.prototype.contains = function(mx, my) {
                 myState.dragging = true;
                 myState.selection = mySel;
                 myState.selectionIndex = i;
+                ctEditor.showShapeActionBar();
                 myState.valid = false;
                 return;
             }
@@ -609,38 +675,42 @@ CanvasState.prototype.clear = function() {
 
 // While draw is called as often as the INTERVAL variable demands,
 // It only ever does something if the canvas gets invalidated by our code
-CanvasState.prototype.draw = function() {
-  // if our state is invalid, redraw and validate!
-  if (!this.valid) {
-    var ctx = this.ctx;
-    var shapes = this.shapes;
-    this.clear();
-    
-    // ** Add stuff you want drawn in the background all the time here **
-    
-    // draw all shapes
-    var l = shapes.length;
-    for (var i = 0; i < l; i++) {
-      var shape = shapes[i];
-      // We can skip the drawing of elements that have moved off the screen:
-      if (shape.x > this.width || shape.y > this.height ||
+CanvasState.prototype.draw = function () {
+    // if our state is invalid, redraw and validate!
+    if (!this.valid) {
+        var ctx = this.ctx;
+        var shapes = this.shapes;
+        this.clear();
+
+        // ** Add stuff you want drawn in the background all the time here **
+
+        // draw all shapes
+        var l = shapes.length;
+        for (var i = 0; i < l; i++) {
+            var shape = shapes[i];
+            // We can skip the drawing of elements that have moved off the screen:
+            if (shape.x > this.width || shape.y > this.height ||
           shape.x + shape.w < 0 || shape.y + shape.h < 0) continue;
-      shapes[i].draw(ctx);
+            shapes[i].draw(ctx);
+        }
+
+        // draw selection
+        // right now this is just a stroke along the edge of the selected Shape
+        if (this.selection != null) {
+            ctx.strokeStyle = this.selectionColor;
+            ctx.lineWidth = this.selectionWidth;
+            var mySel = this.selection;
+            ctx.strokeRect(mySel.x, mySel.y, mySel.w, mySel.h);
+        } else {
+            this.selection = null;
+            this.selectionIndex = null;
+            ctEditor.hideShapeActionBar();
+        }
+
+        // ** Add stuff you want drawn on top all the time here **
+
+        this.valid = true;
     }
-    
-    // draw selection
-    // right now this is just a stroke along the edge of the selected Shape
-    if (this.selection != null) {
-      ctx.strokeStyle = this.selectionColor;
-      ctx.lineWidth = this.selectionWidth;
-      var mySel = this.selection;
-      ctx.strokeRect(mySel.x,mySel.y,mySel.w,mySel.h);
-    }
-    
-    // ** Add stuff you want drawn on top all the time here **
-    
-    this.valid = true;
-  }
 }
 
 // Creates an object with x and y defined, set to the mouse position relative to the state's canvas

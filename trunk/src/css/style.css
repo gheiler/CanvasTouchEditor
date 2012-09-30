@@ -294,7 +294,7 @@ td { vertical-align: top; }
     width: 35px;
 }
 
-.te-toolbox .color-picker, .te-toolbox .undo, .te-toolbox .redo, .te-toolbox .plus-line-width, te-toolbox .minus-line-width, .te-toolbox .minus-line-width {
+.te-toolbox .btn-container.actions div {
     height: 24px;
     width: 24px;
     margin-left: 15px;
@@ -302,29 +302,38 @@ td { vertical-align: top; }
     float: left;
     background-repeat: no-repeat; 
 }
-.te-toolbox .undo {
+.te-toolbox .btn-container.actions div.undo {
     background: url(../img/ui/undo.png);
 }
-.te-toolbox .redo {
+.te-toolbox .btn-container.actions div.redo {
     background: url(../img/ui/redo.png);
 }
-.te-toolbox .color-picker {
-    
+.te-toolbox .btn-container.actions div.color-picker {
+    border-radius: 1em;
 }
-.te-toolbox .plus-line-width {
+.te-toolbox .btn-container.actions div.plus-line-width {
     background: url(../img/ui/add.png);
 }
-.te-toolbox .minus-line-width {
+.te-toolbox .btn-container.actions div.minus-line-width {
     background: url(../img/ui/remove.png);
 }
-.te-toolbox .line-width {
+.te-toolbox .btn-container.actions div.line-width {
     width: 24px;
     height: 1px;
     float: left;
-    margin-top: 17px;
-    margin-left: 15px;
+    margin-top: 8px;
+    margin-left: 0px;
     background-color: #000;
     cursor: default;
+}
+.te-toolbox .save {
+    background-image: url(../img/ui/save.png);
+}
+.te-toolbox .load {
+    background-image: url(../img/ui/documents.png);
+}
+.te-toolbox .erase {
+    background-image: url(../img/ui/erase.png);
 }
 
 .ct-shape-actions {
@@ -342,6 +351,9 @@ td { vertical-align: top; }
     float: left;
     margin-top: 3px;
     margin-left: 5px;
+}
+.ct-shape-actions div.color-picker {
+    border-radius: 1em;
 }
 .ct-shape-actions div.plus-width {
     background-image: url(../img/ui/plus-width.png);

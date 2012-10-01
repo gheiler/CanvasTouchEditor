@@ -1,5 +1,5 @@
 /* Author: Gabriel Heiler 
-   Version: 0.2
+   Version: 0.2.2
    Code: https://github.com/gheiler/CanvasTouchEditor
    License: Everyone, to do whatever they want.
 */
@@ -12,6 +12,7 @@ var ctEditor = {
     shapeType: { cirlce: "circle", rect: "rect", line: "line", stroke: "stroke", img: "img", text: "text" },
     initWithContainer: function (selector) {
         "use strict";
+        document.ontouchmove = function (e) { e.preventDefault() };
         this.settings.containerSelector = selector;
         this.createToolBox();
         this.createCanvas();
@@ -222,13 +223,16 @@ var ctEditor = {
         }
     },
     save: function () {
-        var projects = null; // = localStorage.getItem("projects");
+        var projects = localStorage.getItem("projects");
         if (projects === null) {
             projects = new Array();
+        } else {
+            projects = JSON.parse(projects);
         }
         var project = {
             name: ctEditor.settings.drawingName,
-            data: myState.shapes
+            data: myState.shapes,
+            date: new Date().getTime()
         }
         projects.push(project);
         localStorage.setItem("projects", JSON.stringify(projects));
@@ -238,19 +242,45 @@ var ctEditor = {
         if (sProjects !== null) {
             var projects = JSON.parse(sProjects);
             // show projects list and load on click
-            if (projects.length === 1) {
-                ctEditor.settings.drawingName = projects[0].name;
-                var genericShapes = projects[0].data;
-                var genericShapesLength = genericShapes.length;
-                var i;
-                for (i = 0; i < genericShapesLength; i++) {
-                    var gShape = genericShapes[i];
-                    myState.shapes.push(new Shape(gShape.type, gShape.x, gShape.y, gShape.w, gShape.h, gShape.strokeStyle, gShape.fillStyle, gShape.r, gShape.text, gShape.url, gShape.angle));
-                }
-                myState.valid = false;
+            var projsCont = document.createElement("div");
+            projsCont.setAttribute("class", "ct-projects");
+            projsCont.setAttribute("id", "ctProjects");
+            var title = document.createElement("h3");
+            title.innerHTML = "Projects";
+            var i;
+            var pLength = projects.length;
+            var list = document.createElement("ul");
+            var cancel = document.createElement("li");
+            cancel.setAttribute("onclick", "ctEditor.loadProject(null)");
+            cancel.setAttribute("class", "cancel");
+            cancel.innerHTML = "Cancel";
+            list.appendChild(cancel)
+            for (i = 0; i < pLength; i++) {
+                var item = document.createElement("li");
+                item.setAttribute("onclick", "ctEditor.loadProject(" + i + ")");
+                item.innerHTML = projects[i].name + " - " + projects[i].date.toString();
+                list.appendChild(item);
             }
+            projsCont.appendChild(title);
+            projsCont.appendChild(list);
+            document.body.appendChild(projsCont);
         }
-
+    },
+    loadProject: function (index) {
+        if (index !== null) {
+            var projects = JSON.parse(localStorage.getItem("projects"));
+            var genericShapes = projects[index].data;
+            this.settings.drawingName = projects[index].name;
+            myState.shapes = [];
+            var genericShapesLength = genericShapes.length;
+            var i;
+            for (i = 0; i < genericShapesLength; i++) {
+                var gShape = genericShapes[i];
+                myState.shapes.push(new Shape(gShape.type, gShape.x, gShape.y, gShape.w, gShape.h, gShape.strokeStyle, gShape.fillStyle, gShape.r, gShape.text, gShape.url, gShape.angle));
+            }
+            myState.valid = false;
+        }
+        document.body.removeChild(document.getElementById("ctProjects"));
     },
     erase: function () {
         myState.shapes = [];
@@ -507,17 +537,29 @@ Shape.prototype.draw = function (ctx) {
     ctx.beginPath();
     ctx.strokeStyle = this.strokeStyle;
     ctx.save();
-    //ctx.translate(this.x, this.y);
-    ctx.rotate(this.angle * Math.PI / 180);
     switch (this.type) {
         case ctEditor.shapeType.rect:
-            ctx.rect(this.x, this.y, this.w, this.h);
+            //ctx.rect(this.x, this.y, this.w, this.h);
+            if (this.angle !== 0) {
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle * Math.PI / 180);
+                ctx.rect(0, 0, this.w, this.h);
+            } else {
+                ctx.rect(this.x, this.y, this.w, this.h);
+            }
             break;
         case ctEditor.shapeType.cirlce:
             ctx.arc(this.x + this.r, this.y + this.r, this.r, 0, Math.PI * 2, true);
             break;
         case ctEditor.shapeType.line:
-            ctx.rect(this.x, this.y, this.w, this.h); // if not this way height is always 1px
+            //ctx.rect(this.x, this.y, this.w, this.h); // if not this way height is always 1px
+            if (this.angle !== 0) {
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle * Math.PI / 180);
+                ctx.rect(0, 0, this.w, this.h);
+            } else {
+                ctx.rect(this.x, this.y, this.w, this.h);
+            }
             break;
         case ctEditor.shapeType.stroke:
             if (myState.lastStrokeCoords.x !== null && this.x !== null) {

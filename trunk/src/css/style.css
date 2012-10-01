@@ -386,6 +386,42 @@ td { vertical-align: top; }
     background-image: url(../img/ui/recycle.png);
 }
 
+.ct-projects {
+    position:absolute;
+    top: 50%;
+    left: 50%;
+    width: 300px;
+    height: 250px;
+    margin-top: -125px;
+    margin-left: -150px;
+    border: 1px solid #ccc;
+    background-color: #f3f3f3;
+}
+.ct-projects h3 {
+    margin-left: 10px;
+    margin-top: 5px;
+    text-decoration: underline;
+}
+.ct-projects ul {
+    padding: 0 5px;
+    overflow-y: scroll;
+    max-height: 185px;
+}
+.ct-projects ul li {
+    list-style-type: none;
+    padding: 5px;
+    border: 1px dashed #ccc;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+.ct-projects ul li.cancel {
+    background-color: #222;
+    border-color: #222;
+    color: #fff;
+    
+    width: fit-content;
+}
 
 /* ==|== media queries ======================================================
    EXAMPLE Media Query for Responsive Design.

@@ -1,5 +1,5 @@
 /* Author: Gabriel Heiler 
-   Version: 0.2.2
+   Version: 0.3
    Code: https://github.com/gheiler/CanvasTouchEditor
    License: Everyone, to do whatever they want.
 */

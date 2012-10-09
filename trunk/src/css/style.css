@@ -223,13 +223,14 @@ td { vertical-align: top; }
     background-image: url(../img/bg/noise.png);
 }
 .te-toolbox .btn-container {
-    width: 12%;
+    width: 9%;
     float: left;
     height: 100%;
     box-sizing: border-box;
 }
 .te-toolbox .btn-container.actions {
-    width: 28%;
+    width: 46%;
+    border-left: 2px black solid !important;
 }
 .te-toolbox .btn-container div {
     cursor: pointer;
@@ -302,19 +303,19 @@ td { vertical-align: top; }
     float: left;
     background-repeat: no-repeat; 
 }
-.te-toolbox .btn-container.actions div.undo {
+.te-toolbox .undo {
     background: url(../img/ui/undo.png);
 }
-.te-toolbox .btn-container.actions div.redo {
+.te-toolbox .redo {
     background: url(../img/ui/redo.png);
 }
-.te-toolbox .btn-container.actions div.color-picker {
+.te-toolbox .color-picker {
     border-radius: 1em;
 }
-.te-toolbox .btn-container.actions div.plus-line-width {
+.te-toolbox .plus-line-width {
     background: url(../img/ui/add.png);
 }
-.te-toolbox .btn-container.actions div.minus-line-width {
+.te-toolbox .minus-line-width {
     background: url(../img/ui/remove.png);
 }
 .te-toolbox .btn-container.actions div.line-width {
@@ -334,6 +335,9 @@ td { vertical-align: top; }
 }
 .te-toolbox .erase {
     background-image: url(../img/ui/erase.png);
+}
+.te-toolbox .get-image {
+    background-image: url(../img/ui/open-in-new-window.png);
 }
 
 .ct-shape-actions {
@@ -385,6 +389,7 @@ td { vertical-align: top; }
 .ct-shape-actions div.remove {
     background-image: url(../img/ui/recycle.png);
 }
+
 
 .ct-projects {
     position:absolute;
@@ -439,9 +444,17 @@ td { vertical-align: top; }
     .te-toolbox .btn-container.actions {
         width: 37%;
     }
-    .te-toolbox .line-width {
-        margin-left: 10px;
-        width: 20px;
+    .te-toolbox .btn-container.actions div {
+        width: 18px;
+        height: 18px;
+        background-size: 18px;
+        margin-left: 5px;
+        margin-bottom: 10px;
+    }
+    .te-toolbox .btn-container.actions div.line-width {
+        margin-left: 0px;
+        margin-top: 9px;
+        height: 1px;
     }
     .te-toolbox .color-picker, .te-toolbox .undo, .te-toolbox .redo, .te-toolbox .plus-line-width, te-toolbox .minus-line-width, .te-toolbox .minus-line-width {
         margin-left: 5px;

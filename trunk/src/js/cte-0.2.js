@@ -5,7 +5,7 @@
 */
 /*global document: false, window: false, console: false */
 
-var foregroundColorSelector;
+
 
 var ctEditor = {
     settings: { canvasHeight: 100, canvasWidth: 100, toolBoxHeight: 20, toolBoxWidth: 100, toolBoxRealHeight: null, containerSelector: null, selectedShape: null, foregroundColor: { r: 0, g: 0, b: 0 }, unDoneStrokes: null, lineWidth: 1, fontSize: 30, whomColor: null, drawingName: null },
@@ -86,6 +86,11 @@ var ctEditor = {
             textInputCont.setAttribute("class", "ct-text-input");
             textInputCont.innerHTML = "<input id='cte-txtText' type='text' placeholder='escribe aqui tu texto' /><div class='btn-ok' onclick='ctEditor.drawText();'>";
             container.appendChild(textInputCont);
+            // file upload input
+            var fileInputCont = document.createElement("div");
+            fileInputCont.style.display = "none";
+            fileInputCont.innerHTML = "<input type='file' id='cte-fileUpload' multiple accept='image/*' style='display:none' onchange='ctEditor.handleFiles(this.files)'>";
+            container.appendChild(fileInputCont);
             // Shape Actions
             this.createShapeActions(container);
             // TODO: draw fill color picker, rubber, clear all, save
@@ -171,6 +176,11 @@ var ctEditor = {
         erase.setAttribute("onclick", "ctEditor.erase()");
         btnCont.appendChild(erase);
 
+        var getImage = document.createElement("div");
+        getImage.setAttribute("class", "get-image");
+        getImage.setAttribute("onclick", "ctEditor.getImage()");
+        btnCont.appendChild(getImage);
+
         toolBox.appendChild(btnCont);
     },
     setShape: function (el, type) {
@@ -181,7 +191,7 @@ var ctEditor = {
         el.style.border = "2px " + this.getForegroundColorString() + " solid";
         if (type === this.shapeType.stroke) {
             myState.stroke = true;
-            myState.addShape(new Shape(this.shapeType.stroke, null, null, 0, 0, null, null)); //this is to aviod clonflicts into strokings
+            myState.addShape(new Stroke(null, null, 0, null)); //this is to aviod clonflicts into strokings
         } else {
             myState.stroke = false;
         }
@@ -276,7 +286,14 @@ var ctEditor = {
             var i;
             for (i = 0; i < genericShapesLength; i++) {
                 var gShape = genericShapes[i];
-                myState.shapes.push(new Shape(gShape.type, gShape.x, gShape.y, gShape.w, gShape.h, gShape.strokeStyle, gShape.fillStyle, gShape.r, gShape.text, gShape.url, gShape.angle));
+                switch (gShape.type) {
+                    case "stroke":
+                        myState.shapes.push(new Stroke(gShape.x, gShape.y, gShape.w, gShape.strokeStyle));
+                        break;
+                    default:
+                        myState.shapes.push(new Shape(gShape.type, gShape.x, gShape.y, gShape.w, gShape.h, gShape.strokeStyle, gShape.fillStyle, gShape.r, gShape.text, gShape.url, gShape.angle));
+                        break;
+                }
             }
             myState.valid = false;
         }
@@ -285,6 +302,10 @@ var ctEditor = {
     erase: function () {
         myState.shapes = [];
         myState.valid = false;
+        this.deSelectAllShapes();
+    },
+    getImage: function () {
+        window.open(myState.canvas.toDataURL("image/png"), 'image of:' + this.settings.drawingName);
     },
     getForegroundColorString: function () {
         "use strict";
@@ -316,6 +337,29 @@ var ctEditor = {
         this.toggleTextInput();
         this.settings.selectedShape = null;
         this.deSelectAllShapes();
+    },
+    handleFiles: function (files) {
+        if (files.length > 0) {
+            var file = files[0];
+            var imageType = /image.*/;
+            if (!file.type.match(imageType)) {
+                return;
+            }
+            var img = document.createElement("img");
+            img.setAttribute("id", "ctUploadedImg");
+            img.style.display = "none";
+            img.file = file;
+            document.body.appendChild(img);
+            var reader = new FileReader();
+            reader.onload = (function (aImg) {
+                return function (e) {
+                    //aImg.src = e.target.result;
+                    myState.addShape(new Shape(ctEditor.shapeType.img, myState.textLocation.x, myState.textLocation.y, 0, 0, null, null, null, null, e.target.result));
+                    document.body.removeChild(document.getElementById("ctUploadedImg"));
+                };
+            })(img);
+            reader.readAsDataURL(file);
+        }
     },
     createShapeActions: function (container) {
         "use strict";
@@ -453,6 +497,8 @@ var ctEditor = {
     }
 };
 
+
+var foregroundColorSelector;
 function setForegroundColor(x, y) {
 	foregroundColorSelector.update( x, y );
 	COLOR = foregroundColorSelector.getColor();
@@ -532,6 +578,32 @@ function Shape(type, x, y, w, h, stroke, fill, radius, text, url, angle) {
   this.angle = angle || 0;
 }
 
+function Stroke(x, y, w, stroke) {
+    this.type = "stroke";
+    this.x = x || null;
+    this.y = y || null;
+    this.w = w || 1;
+    this.h = 1;
+    this.strokeStyle = stroke || "#000000";
+}
+Stroke.prototype.draw = function (ctx) {
+    ctx.beginPath();
+    ctx.strokeStyle = this.strokeStyle;
+    if (myState.lastStrokeCoords.x !== null && this.x !== null) {
+        ctx.moveTo(myState.lastStrokeCoords.x, myState.lastStrokeCoords.y);
+        ctx.lineTo(this.x, this.y);
+        ctx.lineWidth = this.w;
+    } else {
+        myState.lastStrokeCoords.x = this.x;
+        myState.lastStrokeCoords.y = this.y;
+        return;
+    }
+    ctx.stroke();
+    myState.lastStrokeCoords.x = this.x;
+    myState.lastStrokeCoords.y = this.y;
+}
+
+
 // Draws this shape to a given context
 Shape.prototype.draw = function (ctx) {
     ctx.beginPath();
@@ -584,8 +656,22 @@ Shape.prototype.draw = function (ctx) {
         case ctEditor.shapeType.img:
             var img = new Image();
             img.onload = function () {
-                ctx.drawImage(img, buttonPadLeft * 9, buttonPadTop);
+                ctx.save();
+                var shape = myState.shapes[img.getAttribute("data-id")];
+                if (shape.w === 1) {
+                    shape.w = img.width;
+                    shape.h = img.height;
+                }
+                if (shape.angle !== 0) {
+                    ctx.translate(shape.x, shape.y);
+                    ctx.rotate(shape.angle * Math.PI / 180);
+                    ctx.drawImage(img, 0, 0, shape.w, shape.h);
+                } else {
+                    ctx.drawImage(img, shape.x, shape.y, shape.w, shape.h);
+                }
+                ctx.restore();
             };
+            img.setAttribute("data-id", myState.drawingIndex);
             img.src = this.url;
             return;
             break;
@@ -645,6 +731,7 @@ Shape.prototype.contains = function(mx, my) {
     this.startTime = null;
     this.endCords = null;
     this.endTime = null;
+    this.drawingIndex = null;
     this.stroke = false;
     this.stroking = false;
     this.lastStrokeCoords = { x: null, y: null};
@@ -681,10 +768,8 @@ Shape.prototype.contains = function(mx, my) {
         myState.startTime = new Date().getTime();
         myState.startCords = myState.getPosition(e.targetTouches[0]);
         shapeStartsMoving(myState.startCords);
-        //alert("start touch");
     }, true);
     canvas.addEventListener("touchmove", function(e) {
-        //alert("touch move");
         var cords = myState.getPosition(e.targetTouches[0]);
         shapeMoving(cords);
     }, true);
@@ -718,21 +803,24 @@ Shape.prototype.contains = function(mx, my) {
     }
 
     function shapeMoving(cords) {
-        if(myState.dragging) {
+        if(myState.stroking) {
+            //myState.addShape(new Shape("stroke", cords.x, cords.y, ctEditor.settings.lineWidth, 0, ctEditor.getForegroundColorString(), null));
+            myState.addShape(new Stroke(cords.x, cords.y, ctEditor.settings.lineWidth, ctEditor.getForegroundColorString()));
+        } else if(myState.dragging) {
             // We don't want to drag the object by its top-left corner, we want to drag it
             // from where we clicked. Thats why we saved the offset and use it here
             myState.selection.x = cords.x - myState.dragoffx;
             myState.selection.y = cords.y - myState.dragoffy;
             myState.valid = false; // Something's dragging so we must redraw
-        } else if(myState.stroking) {
-            myState.addShape(new Shape("stroke", cords.x, cords.y, ctEditor.settings.lineWidth, 0, ctEditor.getForegroundColorString(), null));
         }
     }
     function shapeStartsMoving(cords) {
         var shapes = myState.shapes;
         var l = shapes.length;
         for(var i = l - 1; i >= 0; i--) {
-            if(shapes[i].contains(cords.x, cords.y) && shapes[i].type !== "stroke") {
+            //if(shapes[i].contains(cords.x, cords.y) && shapes[i].type !== "stroke") {
+            var asd = shapes[i];
+            if(shapes[i].type !== "stroke" && shapes[i].contains(cords.x, cords.y)) {
                 var mySel = shapes[i];
                 // Keep track of where in the object we clicked
                 // so we can move it smoothly (see mousemove)
@@ -782,7 +870,7 @@ Shape.prototype.contains = function(mx, my) {
 
     this.selectionColor = '#CC0000';
     this.selectionWidth = 2;
-    this.interval = 41; // 24.4 fps
+    this.interval = 66; // 15 fps
     setInterval(function() { myState.draw(); }, myState.interval);
 }
 
@@ -814,9 +902,9 @@ CanvasState.prototype.draw = function () {
             // We can skip the drawing of elements that have moved off the screen:
             if (shape.x > this.width || shape.y > this.height ||
           shape.x + shape.w < 0 || shape.y + shape.h < 0) continue;
+            this.drawingIndex = i;
             shapes[i].draw(ctx);
         }
-
         // draw selection
         // right now this is just a stroke along the edge of the selected Shape
         if (this.selection != null) {
@@ -868,20 +956,48 @@ CanvasState.prototype.checkTouchClick = function () {
 }
 
 CanvasState.prototype.createDefaultShapeFromType = function (shapeType, x, y) {
-    if (ctEditor.settings.selectedShape === "circle") {
-        this.addShape(new Shape(ctEditor.settings.selectedShape, x - 30, y - 30, 60, 60, null, ctEditor.getForegroundColorString(), 30));
+    /*if (ctEditor.settings.selectedShape === "circle") {
+    this.addShape(new Shape(ctEditor.settings.selectedShape, x - 30, y - 30, 60, 60, null, ctEditor.getForegroundColorString(), 30));
     } else if (ctEditor.settings.selectedShape === "rect") {
-        this.addShape(new Shape(ctEditor.settings.selectedShape, x - 15, y - 15, 30, 30, null, ctEditor.getForegroundColorString()));
+    this.addShape(new Shape(ctEditor.settings.selectedShape, x - 15, y - 15, 30, 30, null, ctEditor.getForegroundColorString()));
     } else if (ctEditor.settings.selectedShape === "line") {
-        this.addShape(new Shape(ctEditor.settings.selectedShape, x - 40, y - 1.5, 80, 3, null, ctEditor.getForegroundColorString()));
+    this.addShape(new Shape(ctEditor.settings.selectedShape, x - 40, y - 1.5, 80, 3, null, ctEditor.getForegroundColorString()));
     } else if (ctEditor.settings.selectedShape === "text") {
-        // TODO: Do Stuff related to text
-        ctEditor.toggleTextInput();
-        this.textLocation.x = x;
-        this.textLocation.y = y;
-        return;
+    // TODO: Do Stuff related to text
+    ctEditor.toggleTextInput();
+    this.textLocation.x = x;
+    this.textLocation.y = y;
+    return;
     } else if (ctEditor.settings.selectedShape === "stroke") {
-        // for now just do nothing...
+    // for now just do nothing...
+    }*/
+
+    switch (ctEditor.settings.selectedShape) {
+        case ctEditor.shapeType.cirlce:
+            this.addShape(new Shape(ctEditor.settings.selectedShape, x - 30, y - 30, 60, 60, null, ctEditor.getForegroundColorString(), 30));
+            break;
+        case ctEditor.shapeType.rect:
+            this.addShape(new Shape(ctEditor.settings.selectedShape, x - 15, y - 15, 30, 30, null, ctEditor.getForegroundColorString()));
+            break;
+        case ctEditor.shapeType.line:
+            this.addShape(new Shape(ctEditor.settings.selectedShape, x - 40, y - 1.5, 80, 3, null, ctEditor.getForegroundColorString()));
+            break;
+        case ctEditor.shapeType.text:
+            ctEditor.toggleTextInput();
+            this.textLocation.x = x;
+            this.textLocation.y = y;
+            return;
+            break;
+        case ctEditor.shapeType.stroke:
+            // for now just do nothing...
+            break;
+        case ctEditor.shapeType.img:
+            this.textLocation.x = x;
+            this.textLocation.y = y;
+            document.getElementById("cte-fileUpload").click();
+            break;
+        default:
+            break;
     }
     ctEditor.settings.selectedShape = null;
     ctEditor.deSelectAllShapes();

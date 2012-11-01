@@ -1,0 +1,15 @@
+/* the humans responsible & colophon */
+/* humanstxt.org */
+
+
+/* TEAM */
+  Developer: Gabriel Heiler
+  Site: http://mobiletest.redirectme.net:8080/
+
+/* THANKS */
+  Names (& URL): Simon Sarris - www.simonsarris.com
+
+
+/* SITE */
+  Standards: HTML5, CSS3
+  Software: Canvas Touch Editor

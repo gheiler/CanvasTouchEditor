@@ -1,5 +1,4 @@
 /* Utilidades */
-
 function AsignDefaultButton(panelSelector, buttonSelector) {
     $(panelSelector).keypress(function (e) {
         if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
@@ -8,7 +7,6 @@ function AsignDefaultButton(panelSelector, buttonSelector) {
         }
     });
 }
-
 function Formfy(formContainerSelector) {
     $(formContainerSelector + ' :input').not(':button,:hidden').each(function (indx, item) {
         var sError = $(item).next('span.error');
@@ -22,7 +20,6 @@ function Formfy(formContainerSelector) {
         }
     });
 }
-
 function blockNonNumbers(obj, e, allowDecimal, allowNegative) {
     var key;
     var isCtrl = false;
@@ -161,7 +158,6 @@ var accentMap = {
     "Ü": "u"
 };
 
-
 // Extension Methods
 if (typeof Number.prototype.toRad == 'undefined') {
   Number.prototype.toRad = function() {
@@ -180,7 +176,6 @@ Date.prototype.getFormattedDate = function() {
     var dayOfMonth = this.getDate();
     return dayOfMonth < 10 ? "0" + dayOfMonth : "" + dayOfMonth;
 }
-
 if (!String.prototype.trim) {
     String.prototype.trim=function(){return this.replace(/^\s\s*/, '').replace(/\s\s*$/, '');};
     String.prototype.ltrim=function(){return this.replace(/^\s+/,'');}
@@ -247,6 +242,7 @@ if (!Array.prototype.move) {
         this.splice(new_index, 0, this.splice(old_index, 1)[0]);
     }
 }
+
 // VISUALES: efects, progress functions, etc
 var Loader = {
     ShowLoading: function () {

@@ -3,4 +3,4 @@ CanvasTouchEditor
 
 Canvas Touch Editor
 
-http://mobiletest.redirectme.net:8080
+http://cte.herokuapp.com/
